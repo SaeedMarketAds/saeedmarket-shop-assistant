@@ -4,8 +4,11 @@ from google import genai
 
 st.set_page_config(page_title="مساعد التسوق الذكي", page_icon="🛍", layout="centered")
 
-# ضع مفتاح الـ API الخاص بك هنا مباشرة
-API_KEY = "أدخل_مفتاحك_هنا"
+# ضع مفتاحك هنا باللغة الإنجليزية حصراً (يبدأ عادة بـ AIza)
+RAW_API_KEY = "ضع_مفتاحك_هنا"
+
+# تنقية المفتاح وجعله مقصوراً على الحروف الإنجليزية والرموز القياسية لمنع خطأ الترميز
+API_KEY = "".join([c for c in RAW_API_KEY if ord(c) < 128]).strip()
 
 def generate_shop_response(store_id, products_str, user_query):
     client = genai.Client(api_key=API_KEY)
@@ -20,7 +23,7 @@ def generate_shop_response(store_id, products_str, user_query):
     """
     
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-3.1-flash",
         contents=prompt
     )
     return response.text
@@ -36,30 +39,24 @@ menu = st.sidebar.selectbox("القائمة الرئيسية", ["محادثة ا
 if menu == "محادثة المساعد":
     st.subheader(f"اسأل مساعد التسوق - {store_id}")
     
-    # تهيئة سجل المحادثة لكل متجر لضمان عدم ضياع الرسائل عند التبديل
     if "messages" not in st.session_state:
         st.session_state.messages = {}
 
     if store_id not in st.session_state.messages:
         st.session_state.messages[store_id] = []
 
-    # جلب منتجات المحل لتحويلها إلى سياق للذكاء الاصطناعي
     products = get_store_products(store_id)
     products_str = products.to_string(index=False) if not products.empty else "لا توجد منتجات مضافة بعد."
 
-    # عرض الرسائل السابقة في واجهة الدردشة
     for message in st.session_state.messages[store_id]:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # صندوق إدخال المحادثة الحديث
     if user_query := st.chat_input("كيف يمكنني مساعدتك اليوم في المنتجات؟"):
-        # تسجيل وعرض رسالة المستخدم
         st.session_state.messages[store_id].append({"role": "user", "content": user_query})
         with st.chat_message("user"):
             st.markdown(user_query)
 
-        # توليد وعرض رد الذكاء الاصطناعي
         with st.chat_message("assistant"):
             with st.spinner("جاري التفكير وتنسيق الإجابة..."):
                 try:
