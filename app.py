@@ -1,39 +1,18 @@
 import streamlit as st
+import os
+from dotenv import load_dotenv
 from database.db_manager import get_store_products, add_product
-from google import genai
+from services.ai_service import generate_shop_response
+
+# تحميل متغيرات البيئة من ملف .env
+load_dotenv()
 
 st.set_page_config(page_title="مساعد التسوق الذكي", page_icon="🛍", layout="centered")
-
-# ضع مفتاحك هنا باللغة الإنجليزية حصراً (يبدأ عادة بـ AIza)
-RAW_API_KEY = "ضع_مفتاحك_هنا"
-
-# تنقية المفتاح وجعله مقصوراً على الحروف الإنجليزية والرموز القياسية لمنع خطأ الترميز
-API_KEY = "".join([c for c in RAW_API_KEY if ord(c) < 128]).strip()
-
-def generate_shop_response(store_id, products_str, user_query):
-    client = genai.Client(api_key=API_KEY)
-    
-    prompt = f"""
-    أنت مساعد تسوق ذكي ومحترف لمتجر يحمل المعرف: {store_id}.
-    هذه هي قائمة المنتجات المتاحة في المتجر حالياً:
-    {products_str}
-    
-    بناءً على المنتجات أعلاه، أجب عن استفسار العميل التالي بطريقة دافئة ومساعدة ومنسقة:
-    استفسار العميل: {user_query}
-    """
-    
-    response = client.models.generate_content(
-        model="gemini-3.1-flash",
-        contents=prompt
-    )
-    return response.text
 
 st.title("🛍 مساعد التسوق الذكي")
 st.write("أهلاً بك في منصة إدارة وتسوق المنتجات الذكية.")
 
-# اختيار المحل أو التجربة من الشريط الجانبي
 store_id = st.sidebar.text_input("معرف المحل (Store ID)", value="store_1")
-
 menu = st.sidebar.selectbox("القائمة الرئيسية", ["محادثة المساعد", "إدارة المنتجات"])
 
 if menu == "محادثة المساعد":
@@ -41,7 +20,6 @@ if menu == "محادثة المساعد":
     
     if "messages" not in st.session_state:
         st.session_state.messages = {}
-
     if store_id not in st.session_state.messages:
         st.session_state.messages[store_id] = []
 
