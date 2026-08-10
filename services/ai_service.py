@@ -1,29 +1,38 @@
 import os
+import streamlit as st
 from google import genai
-from dotenv import load_dotenv
 
-load_dotenv()
-api_key = os.getenv("GEMINI_API_KEY")
+def get_gemini_client():
+    api_key = None
+    try:
+        if "GEMINI_API_KEY" in st.secrets:
+            api_key = st.secrets["GEMINI_API_KEY"]
+    except Exception:
+        pass
+    
+    if not api_key:
+        api_key = os.getenv("GEMINI_API_KEY")
+        
+    if not api_key:
+        raise ValueError("لم يتم العثور على مفتاح API. يرجى إضافته في إعدادات Secrets على منصة Streamlit.")
+        
+    return genai.Client(api_key=api_key)
 
-client = genai.Client(api_key=api_key)
-
-def generate_shop_response(store_name, products_context, user_query):
-    """توليد رد ذكي للعميل بناءً على منتجات المتجر"""
+def generate_shop_response(store_id, products_str, user_query):
+    client = get_gemini_client()
+    
     prompt = f"""
-    انت مساعد تسوق ذكي ومحترف لمتجر "{store_name}".
-    معلومات المنتجات المتوفرة لديك:
-    {products_context}
+    أنت مساعد تسوق ذكي ومحترف لمتجر يحمل المعرف: {store_id}.
+    هذه هي قائمة المنتجات المتاحة في المتجر حالياً:
+    {products_str}
     
-    سؤال العميل: {user_query}
-    
-    أجب باحترافية، وساعد العميل في اختيار المنتج المناسب من القائمة أعلاه فقط.
+    بناءً على المنتجات أعلاه، أجب عن استفسار العميل التالي بطريقة دافئة ومساعدة ومنسقة:
+    استفسار العميل: {user_query}
     """
     
-    try:
-        response = client.models.generate_content(
-            model='gemini-1.5-flash',
-            contents=prompt
-        )
-        return response.text
-    except Exception as e:
-        return f"عذراً، حدث خطأ في الاتصال بالخدمة: {e}"
+    # استخدام النموذج الصحيح والمدعوم
+    response = client.models.generate_content(
+        model="gemini-1.5-flash", 
+        contents=prompt
+    )
+    return response.text
