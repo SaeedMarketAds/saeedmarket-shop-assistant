@@ -1,8 +1,29 @@
 import streamlit as st
 from database.db_manager import get_store_products, add_product
-from services.ai_service import generate_shop_response
+from google import genai
 
 st.set_page_config(page_title="مساعد التسوق الذكي", page_icon="🛍", layout="centered")
+
+# ضع مفتاح الـ API الخاص بك هنا مباشرة
+API_KEY = "أدخل_مفتاحك_هنا"
+
+def generate_shop_response(store_id, products_str, user_query):
+    client = genai.Client(api_key=API_KEY)
+    
+    prompt = f"""
+    أنت مساعد تسوق ذكي ومحترف لمتجر يحمل المعرف: {store_id}.
+    هذه هي قائمة المنتجات المتاحة في المتجر حالياً:
+    {products_str}
+    
+    بناءً على المنتجات أعلاه، أجب عن استفسار العميل التالي بطريقة دافئة ومساعدة ومنسقة:
+    استفسار العميل: {user_query}
+    """
+    
+    response = client.models.generate_content(
+        model="gemini-1.5-flash",
+        contents=prompt
+    )
+    return response.text
 
 st.title("🛍 مساعد التسوق الذكي")
 st.write("أهلاً بك في منصة إدارة وتسوق المنتجات الذكية.")
