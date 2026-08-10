@@ -1,8 +1,8 @@
+import os
 from google import genai
 
-# قم بلصق مفتاح الـ API الخاص بك مباشرة بين علامتي التنصيص بدلاً من النص التوضيحي
-GEMINI_API_KEY = "ضع_مفتاحك_هنا"
-
+# قراءة المفتاح من متغير البيئة (آمن)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 def generate_shop_response(store_name, products_str, user_query):
@@ -15,8 +15,9 @@ def generate_shop_response(store_name, products_str, user_query):
     استفسار العميل: {user_query}
     """
     
+    # تم تصحيح النموذج إلى gemini-2.0-flash
     response = client.models.generate_content(
-        model="gemini-2.0-flash",
+        model="gemini-2.0-flash", 
         contents=prompt
     )
     return response.text
