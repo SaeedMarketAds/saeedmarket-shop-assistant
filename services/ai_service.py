@@ -1,5 +1,5 @@
 import os
-from google import genai
+import google.generativeai as genai
 
 # قراءة المفتاح من متغير البيئة (آمن)
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -15,7 +15,6 @@ def generate_shop_response(store_name, products_str, user_query):
     استفسار العميل: {user_query}
     """
     
-    # تم تصحيح النموذج إلى gemini-2.0-flash
     response = client.models.generate_content(
         model="gemini-3.1-flash", 
         contents=prompt
