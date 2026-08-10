@@ -1,22 +1,22 @@
-import os
 from google import genai
 
-# ضع مفتاح الـ API الخاص بك هنا بين علامتي التنصيص بدلاً من os.getenv
-api_key = "AIzaSy..."  # ضع مفتاحك هنا
+# قم بلصق مفتاح الـ API الخاص بك مباشرة بين علامتي التنصيص بدلاً من النص التوضيحي
+GEMINI_API_KEY = "ضع_مفتاحك_هنا"
 
-client = genai.Client(api_key=api_key)
+client = genai.Client(api_key=GEMINI_API_KEY)
 
 def generate_shop_response(store_name, products_str, user_query):
     prompt = f"""
-    أنت رد ذكي للعميل بناءً على منتجات المتجر: {store_name}
-    المنتجات المتاحة:
+    أنت مساعد تسوق ذكي ومحترف لمتجر يحمل المعرف: {store_name}
+    هذه هي قائمة المنتجات المتاحة في المتجر حالياً:
     {products_str}
     
-    سؤال العميل: {user_query}
+    بناءً على المنتجات أعلاه، أجب عن استفسار العميل التالي بطريقة دافئة ومساعدة ومنسقة:
+    استفسار العميل: {user_query}
     """
     
     response = client.models.generate_content(
-        model="gemini-3.1-flash",
+        model="gemini-1.5-flash",
         contents=prompt
     )
     return response.text
