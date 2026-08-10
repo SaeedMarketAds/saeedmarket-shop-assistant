@@ -16,7 +16,7 @@ def generate_shop_response(store_name, products_str, user_query):
     """
     
     response = client.models.generate_content(
-        model="gemini-1.5-flash",
+        model="gemini-3.1-flash",
         contents=prompt
     )
     return response.text
